@@ -91,6 +91,7 @@ module.exports = function (grunt) {
           grunt.log.error(err);
           return done(false);
         }
+        return done(true);
       });
     }
   });
