@@ -4,6 +4,8 @@ var path = require('path');
 var url = require('url');
 var request = require('request');
 var ProgressBar = require('progress');
+var unzip = require('unzip');
+var chmodr = require('chmodr');
 
 module.exports = function (grunt) {
 
@@ -14,6 +16,7 @@ module.exports = function (grunt) {
   function downloadDriver (options, cb) {
     // Where to save jar to.
     var target_destination = getTarget(options);
+
 
     // If it's already there don't download it.
     if (fs.existsSync(target_destination)) {
@@ -29,7 +32,28 @@ module.exports = function (grunt) {
     // https://nodejs.org/api/stream.html#stream_writable_end_chunk_encoding_callback
     writeStream.on('finish', function(){
       grunt.log.ok('done.');
-      cb(target_destination, null);
+      var ext = path.extname(target_destination);
+      if(ext == '.zip'){
+        var extracted_dir = path.join(options.downloadLocation, path.basename(target_destination, ext));
+        var unzipStream = unzip.Extract({ path: extracted_dir })
+          .on('error', function (err) { cb(null, err); })
+          .on('close', function () {
+            grunt.log.ok('Extracted files from ' + target_destination + ' to ' + extracted_dir);
+            fs.chmodr(extracted_dir, 0755, function(err){
+              if(err){
+                cb(null, err);
+              }else{
+                cb(target_destination, null);
+              }
+            });
+          })
+        ;
+        fs.createReadStream(target_destination)
+          .pipe(unzipStream)
+        ;
+      }else{
+        cb(target_destination, null);
+      }
     });
 
     // Start downloading and showing progress.
@@ -87,6 +111,7 @@ module.exports = function (grunt) {
     for(var driver in options){
       // Download
       downloadDriver(options[driver], function (file, err) {
+        grunt.log.ok('using driver at: ' + file);
         if (err) {
           grunt.log.error(err);
           return done(false);

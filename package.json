@@ -8,7 +8,9 @@
   "dependencies": {
     "grunt-selenium-server": "~0.1.2",
     "progress": "~1.1.2",
-    "request": "~2.27.0"
+    "request": "~2.27.0",
+    "unzip": "~0.1.11",
+    "chmodr": "~1.0.2"
   },
   "description": "",
   "devDependencies": {
