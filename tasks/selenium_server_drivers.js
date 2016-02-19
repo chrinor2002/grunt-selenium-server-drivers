@@ -39,7 +39,7 @@ module.exports = function (grunt) {
           .on('error', function (err) { cb(null, err); })
           .on('close', function () {
             grunt.log.ok('Extracted files from ' + target_destination + ' to ' + extracted_dir);
-            fs.chmodr(extracted_dir, 0755, function(err){
+            chmodr(extracted_dir, 0755, function(err){
               if(err){
                 cb(null, err);
               }else{
